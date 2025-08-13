@@ -29,7 +29,6 @@ fn char_counter<T>(arg: T) -> usize
 fn num_sq<T>(arg: &mut T)
     where T: AsMut<u32>
 {
-    // TODO: Implement the function body.
     let v = arg.as_mut();
     *v = *v * *v;
 }
