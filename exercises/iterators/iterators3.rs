@@ -9,7 +9,6 @@
 // Execute `rustlings hint iterators3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DivisionError {
@@ -26,24 +25,62 @@ pub struct NotDivisibleError {
 // Calculate `a` divided by `b` if `a` is evenly divisible by `b`.
 // Otherwise, return a suitable error.
 pub fn divide(a: i32, b: i32) -> Result<i32, DivisionError> {
-    todo!();
+    if b == 0 {
+        Err(DivisionError::DivideByZero)
+    } else {
+        // 尝试除
+        let div = a / b;
+        if div * b == a {
+            Ok(div)
+        } else {
+            Err(DivisionError::NotDivisible(NotDivisibleError {
+                dividend: a,
+                divisor: b,
+            }))
+        }
+    }
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: Ok([1, 11, 1426, 3])
-fn result_with_list() -> () {
+fn result_with_list() -> Result<Vec<i32>, DivisionError> {
     let numbers = vec![27, 297, 38502, 81];
-    let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    // 注意，如下的collect是支持短路计算的：如果被迭代的元素是一个Result，那么如果遇到一个Err，就返回第一个Err，否则返回Ok(collect的结果)
+    numbers
+        .into_iter()
+        .map(|n| divide(n, 27))
+        .collect()
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: [Ok(1), Ok(11), Ok(1426), Ok(3)]
-fn list_of_results() -> () {
+fn list_of_results() -> Vec<Result<i32, DivisionError>> {
     let numbers = vec![27, 297, 38502, 81];
-    let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    numbers
+        .into_iter()
+        .map(|n| divide(n, 27))
+        .collect::<Vec<Result<i32, DivisionError>>>()
 }
+
+// 观察到，上述两种方式代码逻辑一模一样，区别仅在于返回值类型不同，这是因为collect会根据匹配的类型，调用对应类型的方法（要求这个类型实现了FromIterator trait）。分为如下两种情况，其实情况一是Result专门实现了FromIterator这个trait
+// 情况一：目标类型 (Self): Result<Collection, Error>
+// 输入迭代器 (iter): Iterator<Item = Result<T, Error>>
+// 构建逻辑 (from_iter):
+// 1. 创建一个空的、可变的内部集合 collection。
+// 2. 开始遍历输入的迭代器。
+// 3. 对于每一个元素：
+// 4. 如果是 Ok(item)，则将 item 添加到内部的 collection 中。
+// 5. 如果是 Err(e)，立即停止，丢弃已经收集的所有内容，并直接返回 Err(e)。这就是短路行为。
+// 6. 如果迭代器遍历完成都没有遇到错误，则返回 Ok(collection)。
+// 情况二：目标类型 (Self): Vec<T>
+// 输入迭代器 (iter): Iterator<Item = T>
+// 构建逻辑 (from_iter):
+// 1. 创建一个空的 Vec<T>。
+// 2. 开始遍历输入的迭代器。
+// 3. 对于每一个元素 item，直接调用 vec.push(item) 将其放入 Vec 中。它根本不关心 item 本身是什么。
+// 4. 当迭代器遍历完成后，返回这个 Vec。
 
 #[cfg(test)]
 mod tests {

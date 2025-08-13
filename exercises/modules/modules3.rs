@@ -8,10 +8,10 @@
 // Execute `rustlings hint modules3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-// TODO: Complete this use statement
-use ???
+// 当使用不再prelude模块中的项时，需要显示导入（使用use关键字）
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 fn main() {
     match SystemTime::now().duration_since(UNIX_EPOCH) {

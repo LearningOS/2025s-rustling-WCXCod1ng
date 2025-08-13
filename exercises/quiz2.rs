@@ -20,7 +20,6 @@
 //
 // No hints this time!
 
-// I AM NOT DONE
 
 pub enum Command {
     Uppercase,
@@ -32,11 +31,27 @@ mod my_module {
     use super::Command;
 
     // TODO: Complete the function signature!
-    pub fn transformer(input: ???) -> ??? {
+    // 标注元组类型时，直接使用()即可，而不能使用Tuple
+    pub fn transformer(input: Vec<(String, Command)>) -> Vec<String> {
         // TODO: Complete the output declaration!
-        let mut output: ??? = vec![];
+        let mut output: Vec<String> = vec![];
         for (string, command) in input.iter() {
+            // iter()会返回不可变借用，即&(String, Command)，之后Rust会根据填写的(string, command)自动隐式转换有：
+            // &(String, Command) => (&String, &Command)
+            // 但是不能写&(string, command)，因此此时会与&(String, Command)严格匹配成功，Rust会尝试将值“move”到string中，导致报错
             // TODO: Complete the function body. You can do it!
+            output.push(match *command {
+                Command::Uppercase => {string.to_uppercase()},
+                Command::Trim => {string.trim().to_string()},
+                Command::Append(cnt) => {
+                    let mut res = string.to_string();
+                    if cnt > 0 {
+                        let tmp = "bar".repeat(cnt);
+                        res.push_str(tmp.as_str());
+                    }
+                    res
+                }
+            });
         }
         output
     }
@@ -45,9 +60,10 @@ mod my_module {
 #[cfg(test)]
 mod tests {
     // TODO: What do we need to import to have `transformer` in scope?
-    use ???;
+    use super::my_module::transformer;
     use super::Command;
 
+    // into用于将自身消耗掉，并将所有权转移出去。into方法与from方法是对偶的，当为T实现了From<U>时，可以通过T::from(u)得到T，同时，可以通过U::into()得到T类型
     #[test]
     fn it_works() {
         let output = transformer(vec![

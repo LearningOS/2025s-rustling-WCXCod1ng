@@ -7,12 +7,13 @@
 // Execute `rustlings hint modules2` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 mod delicious_snacks {
-    // TODO: Fix these use statements
-    use self::fruits::PEAR as ???
-    use self::veggies::CUCUMBER as ???
+    // 使用use as可以修改模块对外部的接口，例如下面就相当于暴露了fruit作为PEAR
+    // 使用self::访问当前模块下的子模块、常量或函数
+    // 由于模块中定义的字段、use、fn都是私有的，需要使用pub来将其共有化（这里之所以能够访问PEAR还是因为fruits模块将其pub了出来）
+    pub use self::fruits::PEAR as fruit;
+    pub use self::veggies::CUCUMBER as veggie;
 
     mod fruits {
         pub const PEAR: &'static str = "Pear";

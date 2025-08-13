@@ -14,7 +14,6 @@
 // Execute `rustlings hint hashmaps3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 use std::collections::HashMap;
 
@@ -34,11 +33,34 @@ fn build_scores_table(results: String) -> HashMap<String, Team> {
         let team_1_score: u8 = v[2].parse().unwrap();
         let team_2_name = v[1].to_string();
         let team_2_score: u8 = v[3].parse().unwrap();
-        // TODO: Populate the scores table with details extracted from the
-        // current line. Keep in mind that goals scored by team_1
-        // will be the number of goals conceded from team_2, and similarly
-        // goals scored by team_2 will be the number of goals conceded by
-        // team_1.
+
+        // // fixme
+        // let old_state_1 = match scores.get(&team_1_name) {
+        //   Some(score) => Team{goals_scored: score.goals_scored, goals_conceded: score.goals_conceded},
+        //     None => Team{goals_scored: 0, goals_conceded: 0},
+        // };
+        // let old_state_2 = match scores.get(&team_2_name) {
+        //   Some(score) => Team{goals_scored: score.goals_scored, goals_conceded: score.goals_conceded},
+        //     None => Team{goals_scored: 0, goals_conceded: 0},
+        // };
+        //
+        // scores.insert(team_1_name, Team { // insert需要所有权
+        //     goals_scored: team_1_score + old_state_1.goals_scored,
+        //     goals_conceded: team_2_score + old_state_1.goals_conceded,
+        // });
+        // scores.insert(team_2_name, Team {
+        //     goals_scored: team_2_score + old_state_2.goals_scored,
+        //     goals_conceded: team_1_score + old_state_2.goals_conceded,
+        // });
+
+        // 如下是更加简便的写法：它用到了HashMap提供的entry属性，能够原地操作value
+        let team_1 = scores.entry(team_1_name).or_insert(Team {goals_scored: 0, goals_conceded: 0}); // 如果让Team结构体实现了Default Trait，那么可以直接调用Team::default()方法为其填充默认值
+        team_1.goals_scored += team_1_score;
+        team_1.goals_conceded += team_2_score;
+        let team_2 = scores.entry(team_2_name).or_insert(Team {goals_scored: 0, goals_conceded: 0});
+        team_2.goals_scored += team_2_score;
+        team_2.goals_conceded += team_1_score;
+
     }
     scores
 }

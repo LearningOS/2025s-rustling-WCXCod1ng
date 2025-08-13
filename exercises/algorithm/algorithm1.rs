@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -35,7 +34,7 @@ impl<T> Default for LinkedList<T> {
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T > LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,16 +68,70 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+    where
+        T: PartialOrd, // 只需要 PartialOrd
+    {
+        // 从 list_a 和 list_b 中取出头节点，使它们变为空链表。
+        // 这样可以防止它们的 Drop 实现释放我们即将移动到新链表中的节点。
+        let mut p = list_a.start.take();
+        let mut q = list_b.start.take();
+
+        // 处理其中一个或两个链表为空的初始情况
+        if p.is_none() {
+            return list_b;
         }
-	}
+        if q.is_none() {
+            return list_a;
+        }
+
+        // 创建最终要返回的新链表
+        let mut result = LinkedList::new();
+        result.length = list_a.length + list_b.length;
+
+        // 使用一个 "tail" 引用来指向新链表尾部的 `next` 字段，
+        // 这样我们就可以在 O(1) 时间内追加节点。
+        let mut tail = &mut result.start;
+
+        unsafe {
+            // 循环直到其中一个链表被完全合并
+            while let (Some(p_node), Some(q_node)) = (p, q) {
+                if p_node.as_ref().val < q_node.as_ref().val {
+                    // p 的值更小，将 p 移动到新链表
+                    *tail = p;
+                    // p 指向它的下一个节点
+                    p = (*p_node.as_ptr()).next;
+                    // 更新 tail，使其指向新链表尾部节点的 `next` 字段
+                    tail = &mut (*p_node.as_ptr()).next;
+                } else {
+                    // q 的值更小或相等，将 q 移动到新链表
+                    *tail = q;
+                    // q 指向它的下一个节点
+                    q = (*q_node.as_ptr()).next;
+                    // 更新 tail
+                    tail = &mut (*q_node.as_ptr()).next;
+                }
+            }
+
+            // 此时，p 或 q 中最多只有一个还有剩余节点。
+            // 将剩余的整个链表部分直接链接到新链表的尾部。
+            *tail = p.or(q);
+        }
+
+        // 更新新链表的尾指针 end
+        if let Some(mut current) = result.start {
+            while let Some(next) = unsafe { (*current.as_ptr()).next } {
+                current = next;
+            }
+            result.end = Some(current);
+        }
+
+
+        result
+    }
 }
+
 
 impl<T> Display for LinkedList<T>
 where

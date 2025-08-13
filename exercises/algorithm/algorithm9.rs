@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,20 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        // 从叶子向根调整
+        let mut idx = self.count;
+        while idx > 1 {
+            let pid = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[pid]) {
+                // 应该交换
+                self.items.swap(idx, pid);
+                idx = pid;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +70,7 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		1
     }
 }
 
@@ -84,8 +96,35 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count > 0 {
+            // 说明有元素
+            // 与最后一个元素交换并逻辑剔除
+            self.items.swap(self.count, 1);
+            self.count -= 1;
+
+            // 调整从上到下调整
+            let mut idx = 1;
+            while self.children_present(idx) {
+                // 条件满足时，说明一定有子节点，挑选子节点
+                let left_idx = self.left_child_idx(idx);
+                let child_idx = if self.right_child_idx(idx) <= self.count && (self.comparator)(&self.items[self.right_child_idx(idx)], &self.items[left_idx]) {
+                    self.right_child_idx(idx)
+                } else {
+                    left_idx
+                };
+                // 判断child_idx与idx的关系
+                if (self.comparator)(&self.items[child_idx], &self.items[idx]) {
+                    self.items.swap(child_idx, idx);
+                    idx = child_idx;
+                } else {
+                    break;
+                }
+            }
+            // 实际进行删除
+            self.items.pop()
+        } else {
+            None
+        }
     }
 }
 

@@ -9,7 +9,6 @@
 // Execute `rustlings hint errors6` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 use std::num::ParseIntError;
 
@@ -25,14 +24,19 @@ impl ParsePosNonzeroError {
         ParsePosNonzeroError::Creation(err)
     }
     // TODO: add another error conversion function here.
-    // fn from_parseint...
+    fn from_parseint(err: ParseIntError) -> ParsePosNonzeroError {
+        ParsePosNonzeroError::ParseInt(err)
+    }
 }
 
 fn parse_pos_nonzero(s: &str) -> Result<PositiveNonzeroInteger, ParsePosNonzeroError> {
     // TODO: change this to return an appropriate error instead of panicking
     // when `parse()` returns an error.
-    let x: i64 = s.parse().unwrap();
-    PositiveNonzeroInteger::new(x).map_err(ParsePosNonzeroError::from_creation)
+    let x = match s.parse() {
+        Ok(value) => value,
+        Err(err) => return Err(ParsePosNonzeroError::from_parseint(err)), // 注意对于错误的情况，要用Err包裹（否则就不知道是正确还是错误了，表现为就不知道应该匹配Result<T, E>中的T还是E），错误是第二个类型参数
+    };
+    PositiveNonzeroInteger::new(x).map_err(ParsePosNonzeroError::from_creation) // map_err用于将Result<T, E>转化为Result<T, F>，其中map_err的参数就是一个闭包，它用于将E转化为F。另外当有impl From<E> for F时，使用Result<T, E>?即可直接将E转化为F（Rust会调用E.into()来尝试转化为F）
 }
 
 // Don't change anything below this line.

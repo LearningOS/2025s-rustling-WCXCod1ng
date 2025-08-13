@@ -5,11 +5,11 @@
 // Execute `rustlings hint lifetimes3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-struct Book {
-    author: &str,
-    title: &str,
+// 结构体定义声明周期参数的含义是：结构体实例不能存活的比它内部引用的声明周期要长
+struct Book<'a> {
+    author: &'a str,
+    title: &'a str,
 }
 
 fn main() {
